@@ -4,7 +4,17 @@ const SLIDESHOW = {
     totalPhotos: 0,
     musicTracks: [],
     isGenerating: false,
-    currentFolderPath: ''
+    currentFolderPath: '',
+    watermark: {
+      path: null,
+      position: 'bottom_right',
+      size: 15, // en porcentaje
+      opacity: 0.8 // en formato 0-1
+    },
+    audio: {
+      fadeout: true,
+      normalize: true
+    }
   },
 
   DOM: {
@@ -27,9 +37,25 @@ const SLIDESHOW = {
     inputTransition: document.getElementById('slide-input-transition'),
     selectVideoFormat: document.getElementById('slide-select-video-format'),
 
+    inputWatermarkPath: document.getElementById('slide-input-watermark-path'),
+    btnWatermarkPath: document.getElementById('slide-btn-watermark-path'),
+    watermarkOptions: document.getElementById('slide-watermark-options'),
+    watermark: {
+        selectPosition: document.getElementById('slide-select-watermark-position'),
+        rangeSize: document.getElementById('slide-range-watermark-size'),
+        rangeOpacity: document.getElementById('slide-range-watermark-opacity'),
+        valueSize: document.getElementById('slide-watermark-value-size'),
+        valueOpacity: document.getElementById('slide-watermark-value-opacity')
+    },
+
     musicList: {
         wrapper: document.getElementById('slide-music-list-wrapper'),
         button: document.getElementById('slide-music-list-btn')
+    },
+    audio: {
+      fadeout: document.getElementById('slide-input-audio-fadeout'),
+      normalize: document.getElementById('slide-input-audio-normalize'),
+      normalizeWrapper: document.getElementById('slide-normalize-wrapper') // Nuevo wrapper
     },
 
     inputDestinationPath: document.getElementById('slide-input-destination-path'),
@@ -157,12 +183,31 @@ const SLIDESHOW = {
 
         SLIDESHOW.DOM.musicList.button.disabled = SLIDESHOW.VARS.totalPhotos === 0 || SLIDESHOW.VARS.isGenerating;
 
+        // Ocultar/mostrar la opción de normalizar según el número de pistas
+        if (SLIDESHOW.VARS.musicTracks.length > 1) {
+            SLIDESHOW.DOM.audio.normalizeWrapper.classList.remove('hidden');
+        } else {
+            SLIDESHOW.DOM.audio.normalizeWrapper.classList.add('hidden');
+        }
+
         SLIDESHOW.DOM.btnActionGenerate.disabled = SLIDESHOW.VARS.totalPhotos === 0 || !hasDest || SLIDESHOW.VARS.isGenerating;
         document.querySelectorAll('.btn-delete').forEach(btn => btn.disabled = SLIDESHOW.VARS.isGenerating);
 
         SLIDESHOW.DOM.btnDestinationPath.disabled = SLIDESHOW.VARS.isGenerating;
 
         SLIDESHOW.DOM.btnSourcePath.disabled = SLIDESHOW.VARS.isGenerating;
+
+        SLIDESHOW.DOM.btnWatermarkPath.disabled = SLIDESHOW.VARS.isGenerating;
+
+        SLIDESHOW.DOM.watermark.selectPosition.disabled = SLIDESHOW.VARS.isGenerating;
+
+        SLIDESHOW.DOM.watermark.rangeSize.disabled = SLIDESHOW.VARS.isGenerating;
+
+        SLIDESHOW.DOM.watermark.rangeOpacity.disabled = SLIDESHOW.VARS.isGenerating;
+
+        SLIDESHOW.DOM.audio.fadeout.disabled = SLIDESHOW.VARS.isGenerating;
+
+        SLIDESHOW.DOM.audio.normalize.disabled = SLIDESHOW.VARS.isGenerating;
 
         SLIDESHOW.DOM.sortOptions.options.forEach(radio => radio.disabled = SLIDESHOW.VARS.isGenerating);
 
@@ -277,6 +322,52 @@ const SLIDESHOW = {
 
     });
 
+    SLIDESHOW.DOM.btnWatermarkPath.addEventListener('click', async () => {
+      if (SLIDESHOW.VARS.isGenerating) return;
+
+      const path = await window.api.slideshowSelectWatermark();
+      if (path) {
+        SLIDESHOW.VARS.watermark.path = path;
+        SLIDESHOW.DOM.inputWatermarkPath.value = path;
+        SLIDESHOW.DOM.watermarkOptions.classList.remove('hidden');
+        SLIDESHOW.FN.updateUIState();
+      }
+    });
+
+    SLIDESHOW.DOM.watermark.selectPosition.addEventListener('change', () => {
+      if (SLIDESHOW.VARS.isGenerating) return;
+
+      SLIDESHOW.VARS.watermark.position = SLIDESHOW.DOM.watermark.selectPosition.value;
+    });
+
+    SLIDESHOW.DOM.watermark.rangeSize.addEventListener('input', () => {
+        if (SLIDESHOW.VARS.isGenerating) return;
+        const size = SLIDESHOW.DOM.watermark.rangeSize.value;
+        SLIDESHOW.VARS.watermark.size = parseInt(size);
+        SLIDESHOW.DOM.watermark.valueSize.textContent = `${size}%`;
+    });
+
+    SLIDESHOW.DOM.watermark.rangeOpacity.addEventListener('input', () => {
+        if (SLIDESHOW.VARS.isGenerating) return;
+        const opacityValue = SLIDESHOW.DOM.watermark.rangeOpacity.value;
+        // Guardamos como 0-1 para FFmpeg, pero mostramos 0-100%
+        SLIDESHOW.VARS.watermark.opacity = parseFloat(opacityValue / 100);
+        SLIDESHOW.DOM.watermark.valueOpacity.textContent = `${opacityValue}%`;
+    });
+
+    SLIDESHOW.DOM.audio.fadeout.addEventListener('change', () => {
+      if (SLIDESHOW.VARS.isGenerating) return;
+
+      SLIDESHOW.VARS.audio.fadeout = SLIDESHOW.DOM.audio.fadeout.checked;
+    });
+
+    SLIDESHOW.DOM.audio.normalize.addEventListener('change', () => {
+      if (SLIDESHOW.VARS.isGenerating) return;
+
+      SLIDESHOW.VARS.audio.normalize = SLIDESHOW.DOM.audio.normalize.checked;
+    });
+
+
     SLIDESHOW.DOM.btnDestinationPath.addEventListener('click', async () => {
 
         if (SLIDESHOW.VARS.isGenerating) return;
@@ -363,7 +454,9 @@ const SLIDESHOW = {
             durationPerPhoto,
             useVisualTransition,
             videoFormat,
-            destinationPath
+            destinationPath,
+            watermarkData: SLIDESHOW.VARS.watermark,
+            audioData: SLIDESHOW.VARS.audio
         });
 
         SLIDESHOW.VARS.isGenerating = false;

@@ -26,14 +26,18 @@ Esta herramienta te permite transformar una colección de imágenes en un vídeo
     -   **Verticales**: 9:16 (Stories, Reels), 4:5 (Feed de Instagram), 2:3 (Formato clásico)
     -   **Horizontales**: 5:4, 3:2 (Formatos de feed y fotografía)
 -   **Transiciones Suaves**: Habilita una opción para añadir transiciones de fundido entre fotos, dando un acabado más profesional a tu vídeo.
--   **Banda Sonora**: Añade una o más pistas de audio para crear la atmósfera perfecta.
+-   **Marca de Agua (Branding)**: Añade tu propio logo (en formato PNG) a los vídeos. Controla la **posición** (esquinas o centro), el **tamaño** (como porcentaje del ancho del vídeo) y la **opacidad** para una integración perfecta.
+-   **Banda Sonora Personalizable**:
+    -   Añade una o más pistas de audio para crear la atmósfera perfecta.
+    -   Activa un **fundido de salida** para que la música se desvanezca suavemente al final.
+    -   Utiliza la **normalización de volumen** para que todas tus canciones suenen a un nivel consistente.
 -   **Control de Progreso**: Sigue el proceso de generación del vídeo en tiempo real con una barra de progreso.
 
 #### ¿Cómo se usa?
 
 1.  **Origen**: Selecciona la carpeta con tus imágenes JPG.
 2.  **Configuración**: Ajusta la duración por foto, el formato de salida y si quieres transiciones.
-3.  **Banda Sonora**: Añade las canciones que desees.
+3.  **Branding y Audio**: Configura tu marca de agua y añade las canciones que desees.
 4.  **Destino**: Elige dónde guardar el archivo de vídeo `.mp4` resultante.
 5.  **Generar**: Haz clic en "GENERAR VIDEO" y espera a que el proceso finalice.
 

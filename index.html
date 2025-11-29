@@ -10,34 +10,13 @@
 
     <div class="flex items-center">
       <h2 class="font-title text-2xl md:text-3xl lg:text-4xl font-bold text-center">CAOBA</h2>
-      <div class="badge badge-sm ml-1">1.0.4</div>
+      <div class="badge badge-sm ml-1">1.0.5</div>
     </div>
     
     <div class="tabs tabs-box">
       <input type="radio" name="tab_slideshow" data-target="slideshow" class="tab nav-btn" aria-label="Slideshow" checked="checked" />
       <input type="radio" name="tab_resizer" data-target="resizer" class="tab nav-btn" aria-label="Redimensionar" />
     </div>
-
-    <div class="navbar bg-base-100 shadow-sm">
-      <div class="flex-1 flex">
-        <h2 class="font-title text-2xl md:text-3xl lg:text-4xl font-bold text-center">CAOBA</h2>
-         <div class="badge badge-sm ml-1">1.0.4</div>
-      </div>
-      <div class="flex-none">
-        <ul class="menu menu-horizontal px-1">
-          <li>
-            <details>
-              <summary>Opciones</summary>
-              <ul class="bg-base-100 rounded-t-none p-2">
-                <li><a data-target="slideshow">Slideshow</a></li>
-                <li><a data-target="resizer">Redimensionar</a></li>
-              </ul>
-            </details>
-          </li>
-        </ul>
-      </div>
-    </div>
-
   </header>
 
     <section id="section-slideshow" class="app-section grow gap-4 p-6 max-w-3xl">
@@ -106,8 +85,54 @@
       </fieldset>
 
       <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+        <legend class="fieldset-legend">Marca de Agua (Branding)</legend>
+          
+          <div class="join">
+            <input type="text" class="input grow join-item" id="slide-input-watermark-path" placeholder="Selecciona tu logo (.png)..." readonly>
+            <button id="slide-btn-watermark-path" class="btn join-item bg-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></button>
+          </div>
+
+          <div id="slide-watermark-options" class="hidden mt-2">
+            <label class="flex grow items-center">
+              <span class="grow">Posición:</span>
+              <select id="slide-select-watermark-position" class="select select-sm">
+                  <option value="bottom_right" selected>Abajo a la derecha</option>
+                  <option value="bottom_left">Abajo a la izquierda</option>
+                  <option value="top_right">Arriba a la derecha</option>
+                  <option value="top_left">Arriba a la izquierda</option>
+                  <option value="center">Centro</option>
+              </select>
+            </label>
+            <label class="flex grow items-center mt-2">
+              <span class="grow">Tamaño (% del ancho):</span>
+              <input type="range" id="slide-range-watermark-size" min="5" max="100" value="15" class="range range-xs" />
+              <span id="slide-watermark-value-size" class="ml-2 w-10 text-right">15%</span>
+            </label>
+            <label class="flex grow items-center mt-2">
+              <span class="grow">Opacidad:</span>
+              <input type="range" id="slide-range-watermark-opacity" min="10" max="100" value="80" class="range range-xs" />
+              <span id="slide-watermark-value-opacity" class="ml-2 w-10 text-right">80%</span>
+            </label>
+          </div>
+      </fieldset>
+
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
         <legend class="fieldset-legend">Banda Sonora</legend>
           
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text">Aplicar fundido de salida al audio</span> 
+              <input type="checkbox" id="slide-input-audio-fadeout" class="checkbox" checked />
+            </label>
+            <span class="text-xs text-secondary pl-1">La música se desvanecerá suavemente al final.</span>
+          </div>
+          <div id="slide-normalize-wrapper" class="form-control mt-2 hidden">
+            <label class="label cursor-pointer">
+              <span class="label-text">Normalizar volumen de las pistas</span> 
+              <input type="checkbox" id="slide-input-audio-normalize" class="checkbox" checked />
+            </label>
+            <span class="text-xs text-secondary pl-1">Útil si las canciones tienen volúmenes muy diferentes.</span>
+          </div>
           <span class="text-secondary">Añade canciones y decide cuándo empieza cada una.</span>
           <div id="slide-music-list-wrapper"></div>
           <button id="slide-music-list-btn" class="btn btn-soft" disabled>Añadir Pista de Audio</button>

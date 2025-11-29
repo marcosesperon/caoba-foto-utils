@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('api', {
 
     selectFolder: () => ipcRenderer.invoke('dialog:select-folder'),
     selectFile: () => ipcRenderer.invoke('dialog:select-file'),
+    slideshowSelectWatermark: () => ipcRenderer.invoke('slideshow:select-watermark'),
     saveFile: () => ipcRenderer.invoke('dialog:save-file'),
     
     scanAndSortFiles: (folder, sortMode) => ipcRenderer.invoke('util:scan-and-sort', folder, sortMode),

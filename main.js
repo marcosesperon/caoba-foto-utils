@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const { spawn, execFile } = require('child_process');
+const { spawn, execFile, exec } = require('child_process');
 const sharp = require('sharp');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
@@ -126,6 +126,15 @@ ipcMain.handle('dialog:select-file', async () => {
     return result.filePaths[0];
 });
 
+ipcMain.handle('slideshow:select-watermark', async () => {
+    const result = await dialog.showOpenDialog(CAOBA.mainWindow, {
+        title: 'Selecciona tu logo',
+        filters: [{ name: 'Imágenes', extensions: ['png'] }],
+        properties: ['openFile']
+    });
+    return result.canceled ? null : result.filePaths[0];
+});
+
 ipcMain.handle('dialog:save-file', async () => {
     const result = await dialog.showSaveDialog(CAOBA.mainWindow, {
         title: 'Guardar Video Final',
@@ -195,7 +204,7 @@ ipcMain.handle('action:cancel', async () => {
 // ==================================================================
 //  SLIDESHOW
 // ==================================================================
-ipcMain.handle('action:slide-generate', async (event, { musicData, durationPerPhoto, useVisualTransition, videoFormat, destinationPath }) => {
+ipcMain.handle('action:slide-generate', async (event, { musicData, durationPerPhoto, useVisualTransition, videoFormat, destinationPath, watermarkData, audioData }) => {
     return new Promise(async (resolve) => { 
         
         SLIDESHOW.currentFFmpegProcess = null;
@@ -289,28 +298,123 @@ ipcMain.handle('action:slide-generate', async (event, { musicData, durationPerPh
                 filterComplex += `concat=n=${videoInputCount}:v=1:a=0[vFinalVideo];`;
             };
 
+            // 4. AÑADIR MARCA DE AGUA (si existe)
+            let watermarkFilter = '';
+            if (watermarkData && watermarkData.path) {
+                inputStr += ` -i "${normalizeForCmd(watermarkData.path)}"`;
+                const watermarkInputLabel = `[${videoInputCount + (hasAudio ? calculatedMusicData.length : 0)}:v]`;
+
+                // --- NUEVA LÓGICA DE ESCALADO (PRE-CÁLCULO) ---
+                // 1. Obtenemos las dimensiones originales del logo con Sharp.
+                const imageMetadata = await sharp(watermarkData.path).metadata();
+                const originalWidth = imageMetadata.width;
+                const originalHeight = imageMetadata.height;
+
+                // 2. Calculamos el ancho final del logo basado en el porcentaje del ancho del vídeo.
+                const logoFinalWidth = Math.round(targetW * (watermarkData.size / 100));
+                
+                // 3. Calculamos el alto proporcional y lo redondeamos al número par más cercano para compatibilidad con el códec.
+                const logoFinalHeight = Math.round((logoFinalWidth / originalWidth) * originalHeight / 2) * 2;
+
+                // 4. Construimos un filtro 'scale' simple con valores fijos.
+                const scaleFilter = `${watermarkInputLabel}scale=${logoFinalWidth}:${logoFinalHeight}[logo_scaled]`;
+                // --- FIN NUEVA LÓGICA ---
+
+                let overlayPosition = '';
+                switch (watermarkData.position) {
+                    case 'top_left':     overlayPosition = 'x=10:y=10'; break;
+                    case 'top_right':    overlayPosition = 'x=W-w-10:y=10'; break;
+                    case 'center':       overlayPosition = 'x=(W-w)/2:y=(H-h)/2'; break;
+                    case 'bottom_left':  overlayPosition = 'x=10:y=H-h-10'; break;
+                    case 'bottom_right':
+                    default:             overlayPosition = 'x=W-w-10:y=H-h-10'; break;
+                }
+
+                // Encadenamos los filtros: escalar, aplicar opacidad y superponer.
+                // Usamos una etiqueta intermedia [vWithOverlay] para evitar reutilizar [vFinalVideo] como entrada y salida en el mismo filtro.
+                watermarkFilter = `;${scaleFilter};[vFinalVideo][logo_scaled]overlay=${overlayPosition}[vWithOverlay];[vWithOverlay]colorchannelmixer=aa=${watermarkData.opacity}[vFinalVideo]`;
+            }
+
+            // Añadimos el filtro de la marca de agua (si se generó) al final de la cadena de filtros de vídeo.
+            if (filterComplex.endsWith(';')) filterComplex = filterComplex.slice(0, -1);
+            filterComplex += watermarkFilter;
+
+            // 5. CONSTRUIR CADENA DE AUDIO
+            let audioChainLabel = ''; // Declarar la variable fuera del bloque
             if (hasAudio) {
-                let audioInputsCount = calculatedMusicData.length;
-                if (audioInputsCount === 1) { filterComplex += `[${videoInputCount}:a]anull[aFinalAudio];`; } else {
-                    let previousAudioLabel = `[${videoInputCount}:a]`; 
-                    for (let i = 1; i < audioInputsCount; i++) {
+                // --- PASO 5.1: Mezcla de pistas (si hay más de una) ---
+                let audioFilterComplex = ""; // Cadena de filtros solo para el audio
+                audioChainLabel = `[${videoInputCount}:a]`; // Asignar el valor inicial
+                if (calculatedMusicData.length > 1) { // Si hay más de una pista, se mezclan
+                    let previousAudioLabel = `[${videoInputCount}:a]`;
+                    for (let i = 1; i < calculatedMusicData.length; i++) {
                         const currentTrackMeta = calculatedMusicData[i];
-                        const nextLabel = (i === audioInputsCount - 1) ? `[aFinalAudio]` : `[aMix${i}]`;
-                        const trimDuration = currentTrackMeta.startTimeSec + audioCrossfadeDuration;
-                        filterComplex += `${previousAudioLabel}atrim=duration=${trimDuration},asetpts=PTS-STARTPTS[aTrimmed${i}];`;
-                        filterComplex += `[aTrimmed${i}][${videoInputCount + i}:a]acrossfade=d=${audioCrossfadeDuration}${nextLabel};`;
+                        const nextLabel = (i === calculatedMusicData.length - 1) ? `[audio_mixed]` : `[aMix${i}]`;
+                        const trimDuration = currentTrackMeta.startTimeSec + audioCrossfadeDuration; // Duración hasta el punto de crossfade
+                        audioFilterComplex += `${previousAudioLabel}atrim=duration=${trimDuration},asetpts=PTS-STARTPTS[aTrimmed${i}];`;
+                        audioFilterComplex += `[aTrimmed${i}][${videoInputCount + i}:a]acrossfade=d=${audioCrossfadeDuration}${nextLabel};`;
                         previousAudioLabel = nextLabel;
+                    }
+                    audioChainLabel = `[audio_mixed]`;
+                }
+
+                // --- PASO 5.2: Normalización de volumen (si está activada) ---
+                if (audioData.normalize && calculatedMusicData.length > 1) {
+                    // Construimos el filtro de análisis de loudnorm
+                    const loudnormAnalysisFilter = `${audioChainLabel}loudnorm=I=-16:LRA=11:print_format=json[aLoudnormOut]`;
+                    // El comando de análisis solo debe contener los filtros de audio
+                    const analysisFilterComplex = audioFilterComplex + loudnormAnalysisFilter;
+
+                    // loudnorm es un proceso de 2 pasadas.
+                    // 1ª pasada: Analizar el audio y no generar salida.
+                    const analysisCmd = `"${ffmpegPath}" -y ${inputStr} -filter_complex "${analysisFilterComplex}" -map "[aLoudnormOut]" -vn -sn -f null -`;
+                    console.log("--- Iniciando 1ª pasada de normalización de audio ---");
+
+                    // Ejecutamos la primera pasada de forma síncrona para capturar su log
+                    const analysisResult = await new Promise((resolveExec) => {
+                        exec(analysisCmd, { cwd: folder }, (error, stdout, stderr) => {
+                            resolveExec(stderr);
+                        });
+                    });
+
+                    // Extraemos los valores medidos del log de FFmpeg
+                    const measured = analysisResult.split('Parsed_loudnorm_')[1];
+                    if (measured) {
+                        const loudnormParams = JSON.parse(measured);
+                        // Añadimos la 2ª pasada al filtro complejo con los valores medidos
+                        audioFilterComplex += `${audioChainLabel}loudnorm=I=-16:LRA=11:measured_I=${loudnormParams.input_i}:measured_LRA=${loudnormParams.input_lra}:measured_tp=${loudnormParams.input_tp}:measured_thresh=${loudnormParams.input_thresh}:offset=${loudnormParams.target_offset}[audio_normalized];`;
+                        audioChainLabel = `[audio_normalized]`;
+                        console.log("--- 2ª pasada de normalización configurada ---");
+                    }
+                }
+
+                // --- PASO 5.3: Fundido de salida (si está activado) ---
+                if (audioData.fadeout) {
+                    const fadeoutStart = totalVideoDuration - 3; // Fade-out en los últimos 3 segundos
+                    if (fadeoutStart > 0) {
+                        audioFilterComplex += `${audioChainLabel}afade=t=out:st=${fadeoutStart}:d=3[aFinalAudio];`;
+                        audioChainLabel = `[aFinalAudio]`;
                     };
-                };
-            };
+                }
+
+                // Añadimos todos los filtros de audio a la cadena principal, asegurando la separación con punto y coma
+                if (audioFilterComplex) {
+                    filterComplex += (filterComplex ? ';' : '') + audioFilterComplex;
+                }
+
+                // --- PASO 5.4: Etiqueta de salida final ---
+                // Nos aseguramos de que la salida final de la cadena de audio siempre tenga la misma etiqueta.
+                // Usamos anull que simplemente pasa el audio sin modificarlo.
+                filterComplex += `${audioChainLabel}anull[aFinal];`;
+            }
 
             if (filterComplex.endsWith(';')) filterComplex = filterComplex.slice(0, -1);
 
             // GUARDAR SCRIPT
             fs.writeFileSync(filterScriptFile, filterComplex, { encoding: 'utf8' });
 
-            const audioMapCmd = hasAudio ? '-map "[aFinalAudio]"' : '';
-
+            const audioMapCmd = hasAudio ? `-map "[aFinal]"` : '';
+            
             let metadataCmd = ` -metadata author="CAOBA"`;
             
             // COMANDO FINAL
@@ -359,9 +463,9 @@ ipcMain.handle('action:slide-generate', async (event, { musicData, durationPerPh
 
             SLIDESHOW.currentFFmpegProcess.on('close', (code) => {
 
-                console.log(`Proceso FFmpeg terminado con código: ${code}`);
+                console.log(`Proceso FFmpeg terminado con codigo: ${code}`);
                 SLIDESHOW.currentFFmpegProcess = null;
-                if (fs.existsSync(filterScriptFile)) try { fs.unlinkSync(filterScriptFile); } catch(e){}
+               // if (fs.existsSync(filterScriptFile)) try { fs.unlinkSync(filterScriptFile); } catch(e){}
 
                 if (CAOBA.isCancelled) {
                     resolve({ success: false, error: "Cancelado por el usuario.", cancelado: true });
