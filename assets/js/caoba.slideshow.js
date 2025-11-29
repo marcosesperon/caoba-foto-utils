@@ -8,12 +8,12 @@ const SLIDESHOW = {
     watermark: {
       path: null,
       position: 'bottom_right',
-      size: 15, // en porcentaje
+      size: 100, // en porcentaje
       opacity: 0.8 // en formato 0-1
     },
     audio: {
       fadeout: true,
-      normalize: true
+      normalize: false
     }
   },
 
@@ -467,7 +467,11 @@ const SLIDESHOW = {
 
         if (result.success) {
 
-            CAOBA.FN.setStatus({'text': `🎉 ¡Video completado!\n${result.path}`, 'class': 'alert-success'});
+            // Creamos un enlace '<a>' para que la ruta sea clickeable
+            const successMessage = `🎉 ¡Video completado!<br><a href="#" onclick="window.api.shellOpenPath('${result.path.replace(/\\/g, '\\\\')}')" class="link link-accent">${result.path}</a>`;
+            
+            // Usamos 'html' en lugar de 'text' para que se renderice el enlace
+            CAOBA.FN.setStatus({'html': successMessage, 'class': 'alert-success'});
             CAOBA.FN.setProgressBar({'value': 100});
 
         } else {

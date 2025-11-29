@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const { spawn, execFile, exec } = require('child_process');
 const sharp = require('sharp');
@@ -142,6 +142,16 @@ ipcMain.handle('dialog:save-file', async () => {
         filters: [{ name: 'Video MP4', extensions: ['mp4'] }]
     });
     return result.canceled ? null : result.filePath;
+});
+
+ipcMain.handle('shell:open-path', async (event, filePath) => {
+    try {
+        await shell.openPath(filePath);
+        return { success: true };
+    } catch (error) {
+        console.error(`Error al intentar abrir la ruta: ${filePath}`, error);
+        return { success: false, error: error.message };
+    }
 });
 
 ipcMain.handle('util:scan-and-sort', async (event, folder, sortMode) => {

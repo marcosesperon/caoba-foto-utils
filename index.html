@@ -105,12 +105,12 @@
             </label>
             <label class="flex grow items-center mt-2">
               <span class="grow">Tamaño (% del ancho):</span>
-              <input type="range" id="slide-range-watermark-size" min="5" max="100" value="15" class="range range-xs" />
-              <span id="slide-watermark-value-size" class="ml-2 w-10 text-right">15%</span>
+              <input type="range" id="slide-range-watermark-size" min="5" max="100" value="100" step="5" class="range range-xs max-w-48" />
+              <span id="slide-watermark-value-size" class="ml-2 w-10 text-right">100%</span>
             </label>
             <label class="flex grow items-center mt-2">
               <span class="grow">Opacidad:</span>
-              <input type="range" id="slide-range-watermark-opacity" min="10" max="100" value="80" class="range range-xs" />
+              <input type="range" id="slide-range-watermark-opacity" min="10" max="100" value="80" class="range range-xs max-w-48" />
               <span id="slide-watermark-value-opacity" class="ml-2 w-10 text-right">80%</span>
             </label>
           </div>
@@ -129,7 +129,7 @@
           <div id="slide-normalize-wrapper" class="form-control mt-2 hidden">
             <label class="label cursor-pointer">
               <span class="label-text">Normalizar volumen de las pistas</span> 
-              <input type="checkbox" id="slide-input-audio-normalize" class="checkbox" checked />
+              <input type="checkbox" id="slide-input-audio-normalize" class="checkbox" />
             </label>
             <span class="text-xs text-secondary pl-1">Útil si las canciones tienen volúmenes muy diferentes.</span>
           </div>

@@ -40,16 +40,21 @@ const CAOBA = {
             if( typeof p_params === 'undefined' ) p_params = {};
             if( typeof p_params.class === 'undefined' ) p_params.class = '';
             if( typeof p_params.text === 'undefined' ) p_params.text = '';
+            if( typeof p_params.html === 'undefined' ) p_params.html = '';
 
             CAOBA.DOM.status.div.className = 'alert alert-soft';
-            if( p_params.text === '' ) {
+            if( p_params.text === '' && p_params.html === '' ) {
                 CAOBA.DOM.status.wrapper.classList.add('hidden');
             } else {
                 CAOBA.DOM.status.wrapper.classList.remove('hidden');
             };
             if( p_params.class !== '' ) CAOBA.DOM.status.div.classList.add( p_params.class );
             
-            CAOBA.DOM.status.text.innerText = p_params.text;
+            if( p_params.html !== '' ) {
+                CAOBA.DOM.status.text.innerHTML = p_params.html;
+            } else {
+                CAOBA.DOM.status.text.innerText = p_params.text;
+            };
 
         }
 

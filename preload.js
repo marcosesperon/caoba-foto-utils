@@ -12,8 +12,9 @@ contextBridge.exposeInMainWorld('api', {
     scanAndSortFiles: (folder, sortMode) => ipcRenderer.invoke('util:scan-and-sort', folder, sortMode),
     
     slideshowGenerate: (data) => ipcRenderer.invoke('action:slide-generate', data),
-    
     cancelGeneration: () => ipcRenderer.invoke('action:cancel'),
+
+    shellOpenPath: (path) => ipcRenderer.invoke('shell:open-path', path),
 
     resizerGenerate: (folder, dimension, saveMode) => ipcRenderer.invoke('action:resizer-generate', folder, dimension, saveMode)
 });
