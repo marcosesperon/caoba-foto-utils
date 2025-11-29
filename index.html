@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html data-theme="autumn">
+<head>
+    <title>CAOBA</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body class="h-screen relative flex flex-col">
+
+  <header class="flex flex-col justify-center glass sticky p-2 top-0 z-2">
+
+    <div class="flex items-center">
+      <h2 class="font-title text-2xl md:text-3xl lg:text-4xl font-bold text-center">CAOBA</h2>
+      <div class="badge badge-sm ml-1">1.0.4</div>
+    </div>
+    
+    <div class="tabs tabs-box">
+      <input type="radio" name="tab_slideshow" data-target="slideshow" class="tab nav-btn" aria-label="Slideshow" checked="checked" />
+      <input type="radio" name="tab_resizer" data-target="resizer" class="tab nav-btn" aria-label="Redimensionar" />
+    </div>
+
+    <div class="navbar bg-base-100 shadow-sm">
+      <div class="flex-1 flex">
+        <h2 class="font-title text-2xl md:text-3xl lg:text-4xl font-bold text-center">CAOBA</h2>
+         <div class="badge badge-sm ml-1">1.0.4</div>
+      </div>
+      <div class="flex-none">
+        <ul class="menu menu-horizontal px-1">
+          <li>
+            <details>
+              <summary>Opciones</summary>
+              <ul class="bg-base-100 rounded-t-none p-2">
+                <li><a data-target="slideshow">Slideshow</a></li>
+                <li><a data-target="resizer">Redimensionar</a></li>
+              </ul>
+            </details>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </header>
+
+    <section id="section-slideshow" class="app-section grow gap-4 p-6 max-w-3xl">
+        
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+        <legend class="fieldset-legend">Origen de las Imágenes</legend>
+          
+          <div class="join">
+            <input type="text" class="input grow join-item" id="slide-input-source-path" placeholder="Selecciona la carpeta con los JPG..." readonly>
+            <button id="slide-btn-source-path" class="btn join-item bg-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h5l2 3h9a2 2 0 0 1 2 2v2M19 15v6M16 18h6"/></svg></button>
+          </div>
+
+          <span id="slide-info-source-path" class="text-accent">Ninguna carpeta seleccionada</span>
+
+          <div id="slide-source-sort-options" class="hidden">
+            <span class="text-secondary">Ordenar por:</span>
+            <label>
+                <input type="radio" name="slide-source-sort-mode" value="name" checked> Nombre
+            </label>
+            <label>
+                <input type="radio" name="slide-source-sort-mode" value="date"> Fecha (EXIF)
+            </label>
+          </div>
+
+          <div id="slide-source-file-list-wrapper" class="hidden">
+            <span class="text-xs">Vista previa del orden secuencial:</span>
+            <div id="slide-source-file-list-preview" class="text-xs overflow-y-auto" style="max-height: 10rem;"></div>
+            <span class="text-xs">Desplázate para ver todas las imágenes.</span>
+          </div>
+
+      </fieldset>
+
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+        <legend class="fieldset-legend">Configuración del Vídeo</legend>
+
+        <div class="flex ">
+          <label class="flex grow items-center">
+            <span class="grow">Segundos por foto:</span>
+            <input type="number" id="slide-input-duration" value="4" min="1" step="0.5" class="input" />
+          </label>
+        </div>
+    
+        <div class="flex">
+            <label class="flex grow items-center">Formato de salida:</label>
+            <select id="slide-select-video-format" class="select">
+                <optgroup label="Formatos Estándar (TV/Móvil)">
+                    <option value="169_h" selected>Horizontal Panorámico (16:9)</option>
+                    <option value="916_v">Vertical Historias/Reels (9:16)</option>
+                </optgroup>
+                <optgroup label="Formatos Fotográficos/Feed">
+                    <option value="45_v">Vertical Feed/Instagram (4:5)</option>
+                    <option value="45_h">Horizontal Feed (5:4)</option>
+                    <option value="23_v">Vertical Clásico (2:3)</option>
+                    <option value="23_h">Horizontal Clásico (3:2)</option>
+                </optgroup>
+            </select>
+        </div>
+        
+        <div class="flex flex-row justify-between">
+          <label class="label">
+            <input type="checkbox" id="slide-input-transition" class="checkbox" />
+            Transiciones visuales suaves
+          </label>
+        </div>
+
+      </fieldset>
+
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+        <legend class="fieldset-legend">Banda Sonora</legend>
+          
+          <span class="text-secondary">Añade canciones y decide cuándo empieza cada una.</span>
+          <div id="slide-music-list-wrapper"></div>
+          <button id="slide-music-list-btn" class="btn btn-soft" disabled>Añadir Pista de Audio</button>
+
+      </fieldset>
+
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+        <legend class="fieldset-legend">Destino</legend>
+          <span class="text-secondary">Elige dónde quieres guardar el archivo de video resultante.</span>
+          
+          <div class="join min-w-max">
+              <input type="text" id="slide-input-destination-path" class="input grow join-item" placeholder="Ruta y nombre del archivo de salida (.mp4)..." readonly>
+              <button id="slide-btn-destination-path" class="btn join-item bg-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></button>
+          </div>
+      </fieldset>
+
+    </section>
+
+    <section id="section-resizer" class="app-section grow gap-4 p-6 max-w-3xl hidden">
+
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+          <legend class="fieldset-legend">Origen de las Imágenes</legend>
+            <span class="text-accent">Selecciona una carpeta. Todas las imágenes JPG dentro se modificarán.</span>
+            <div class="join">
+                <input type="text" class="input grow join-item" id="resizer-input-source-path" placeholder="Selecciona la carpeta con los JPG..." readonly>
+                <button id="resizer-btn-source-path" class="btn join-item bg-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h5l2 3h9a2 2 0 0 1 2 2v2M19 15v6M16 18h6"/></svg></button>
+            </div>
+            <span id="resizer-info-source-path" class="text-accent">Ninguna carpeta seleccionada</span>
+        </fieldset>
+
+        <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+          <legend class="fieldset-legend">Tamaño Máximo</legend>
+
+            <span class="text-accent">Indica el tamaño máximo en píxeles (ancho o alto). La imagen mantendrá su proporción.</span>
+            <div class="join">
+              <input type="number" id="resizer-input-maxsize" class="input grow" value="2000" min="100" step="20" placeholder="Ej: 1000">
+            </div>
+
+        </fieldset>
+
+        <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
+          <legend class="fieldset-legend">Modo de Guardado</legend>
+
+            <div class="radio-group text-xs">
+              <div class="flex flex-col mb-2">
+                <label class="radio-option">
+                    <input type="radio" class="radio" name="resizer-input-mode" value="new" checked>
+                    <span class="ml-2">Guardar como copias nuevas (Seguro)</span>
+                </label>
+                <span class="text-accent ml-4 pl-4"">Se creará un archivo nuevo (ej: imagen_resized.jpg). El original no se toca.</span>
+              </div>
+
+              <div class="flex flex-col">
+                <label class="radio-option">
+                    <input type="radio" class="radio" name="resizer-input-mode" value="overwrite">
+                    <span class="ml-2">Sobrescribir archivos originales (Destructivo)</span>
+                </label>
+                 <span class="text-warning ml-4 pl-4"">⚠️ Cuidado: Tus fotos originales serán reemplazadas permanentemente.</span>
+              </div>
+            </div>
+
+        </fieldset>
+
+    </section>
+
+    <footer class="glass sticky bottom-0 p-4 text-center text-sm text-secondary">
+       
+      <div id="progress-bar-wrapper" class="flex justify-center items-center py-2 px-8 hidden">
+        <progress id="progress-bar" class="progress progress-success" value="0" max="100"></progress>
+        <div id="progress-bar-text" class="text-xs ml-2">0%</div>
+      </div>
+
+        <div id="status-wrapper" class="p-4 hidden">
+          <div id="status" class="alert alert-soft"><span id="status-text"></span></div>
+        </div>
+
+        <div id="section-slideshow-actions" class="app-section">
+
+          <div class="flex flex-col justify-center sticky inset-x-0 bottom-0">
+
+            <div id="slide-action-cancel-wrapper" class="grow flex py-2 mx-4 hidden">
+              <button id="slide-btn-action-cancel" class="btn btn-secondary grow">CANCELAR</button>
+            </div>
+
+            <div class="grow flex py-2 mx-4">
+              <button id="slide-btn-action-generate" class="btn btn-primary grow" disabled>GENERAR VIDEO</button>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div id="section-resizer-actions" class="app-section hidden">
+
+          <div class="flex flex-col justify-center sticky inset-x-0 bottom-0">
+
+            <div id="resizer-action-cancel-wrapper" class="grow flex py-2 mx-4 hidden">
+              <button id="resizer-btn-action-cancel" class="btn btn-secondary grow">CANCELAR</button>
+            </div>
+
+            <div class="grow flex py-2 mx-4">
+              <button id="resizer-btn-action-generate" class="btn btn-primary grow" disabled>REDIMENSIONAR</button>
+            </div>
+
+          </div>
+        
+        </div>
+
+    </footer>
+
+    <script src="assets/js/caoba.js"></script>
+    <script src="assets/js/caoba.slideshow.js"></script>
+    <script src="assets/js/caoba.resizer.js"></script>
+</body>
+</html>
