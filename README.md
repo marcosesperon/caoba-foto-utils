@@ -1,4 +1,4 @@
-# CAOBA (v1.0.4)
+# CAOBA
 
 CAOBA es una aplicación de escritorio sencilla y potente diseñada para ayudarte con dos tareas comunes en la gestión de imágenes: crear vídeos a partir de tus fotos y redimensionar imágenes en lote.
 

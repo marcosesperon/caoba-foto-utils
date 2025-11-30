@@ -52,16 +52,16 @@
       <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
         <legend class="fieldset-legend">Configuración del Vídeo</legend>
 
-        <div class="flex ">
+        <div class="flex">
           <label class="flex grow items-center">
             <span class="grow">Segundos por foto:</span>
-            <input type="number" id="slide-input-duration" value="4" min="1" step="0.5" class="input" />
+            <input type="number" id="slide-input-duration" value="4" min="1" step="0.5" class="input max-w-60" />
           </label>
         </div>
     
         <div class="flex">
             <label class="flex grow items-center">Formato de salida:</label>
-            <select id="slide-select-video-format" class="select">
+            <select id="slide-select-video-format" class="select max-w-60">
                 <optgroup label="Formatos Estándar (TV/Móvil)">
                     <option value="169_h" selected>Horizontal Panorámico (16:9)</option>
                     <option value="916_v">Vertical Historias/Reels (9:16)</option>
