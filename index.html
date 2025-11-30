@@ -119,23 +119,24 @@
       <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4">
         <legend class="fieldset-legend">Banda Sonora</legend>
           
-          <div class="form-control">
+          <span class="text-secondary">Añade canciones y decide cuándo empieza cada una.</span>
+          <div id="slide-music-list-wrapper"></div>
+          <button id="slide-music-list-btn" class="btn btn-soft" disabled>Añadir Pista de Audio</button>
+
+          <div id="slide-audio-fadeout-wrapper" class="form-control hidden flex flex-col mt-2">
             <label class="label cursor-pointer">
-              <span class="label-text">Aplicar fundido de salida al audio</span> 
               <input type="checkbox" id="slide-input-audio-fadeout" class="checkbox" checked />
+              <span class="label-text">Aplicar fundido de salida al audio</span> 
             </label>
-            <span class="text-xs text-secondary pl-1">La música se desvanecerá suavemente al final.</span>
+            <span class="text-xs text-secondary ml-4 pl-4">La música se desvanecerá suavemente al final.</span>
           </div>
           <div id="slide-normalize-wrapper" class="form-control mt-2 hidden">
             <label class="label cursor-pointer">
               <span class="label-text">Normalizar volumen de las pistas</span> 
               <input type="checkbox" id="slide-input-audio-normalize" class="checkbox" />
             </label>
-            <span class="text-xs text-secondary pl-1">Útil si las canciones tienen volúmenes muy diferentes.</span>
+            <span class="text-xs text-secondary ml-4 pl-4">Útil si las canciones tienen volúmenes muy diferentes.</span>
           </div>
-          <span class="text-secondary">Añade canciones y decide cuándo empieza cada una.</span>
-          <div id="slide-music-list-wrapper"></div>
-          <button id="slide-music-list-btn" class="btn btn-soft" disabled>Añadir Pista de Audio</button>
 
       </fieldset>
 

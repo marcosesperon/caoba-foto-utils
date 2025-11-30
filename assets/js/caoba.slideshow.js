@@ -54,8 +54,9 @@ const SLIDESHOW = {
     },
     audio: {
       fadeout: document.getElementById('slide-input-audio-fadeout'),
+      fadeoutWrapper: document.getElementById('slide-audio-fadeout-wrapper'),
       normalize: document.getElementById('slide-input-audio-normalize'),
-      normalizeWrapper: document.getElementById('slide-normalize-wrapper') // Nuevo wrapper
+      normalizeWrapper: document.getElementById('slide-normalize-wrapper')
     },
 
     inputDestinationPath: document.getElementById('slide-input-destination-path'),
@@ -184,10 +185,15 @@ const SLIDESHOW = {
         SLIDESHOW.DOM.musicList.button.disabled = SLIDESHOW.VARS.totalPhotos === 0 || SLIDESHOW.VARS.isGenerating;
 
         // Ocultar/mostrar la opción de normalizar según el número de pistas
-        if (SLIDESHOW.VARS.musicTracks.length > 1) {
-            SLIDESHOW.DOM.audio.normalizeWrapper.classList.remove('hidden');
+        if (SLIDESHOW.VARS.musicTracks.length > 0) {
+            SLIDESHOW.DOM.audio.fadeoutWrapper.classList.remove('hidden');
+            /*if (SLIDESHOW.VARS.musicTracks.length > 1) {
+                SLIDESHOW.DOM.audio.normalizeWrapper.classList.remove('hidden');
+            } else {
+                SLIDESHOW.DOM.audio.normalizeWrapper.classList.add('hidden');
+            }*/
         } else {
-            SLIDESHOW.DOM.audio.normalizeWrapper.classList.add('hidden');
+            SLIDESHOW.DOM.audio.fadeoutWrapper.classList.add('hidden');
         }
 
         SLIDESHOW.DOM.btnActionGenerate.disabled = SLIDESHOW.VARS.totalPhotos === 0 || !hasDest || SLIDESHOW.VARS.isGenerating;
